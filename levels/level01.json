@@ -1,0 +1,13 @@
+{
+  "collectorStart": {"x": 32, "y": 90},
+  "ground": {"enemies": [ {"x": 0, "right": 0}
+                          
+                          
+             ],
+             "aids": [ {"x": 470}, {"x": 955}
+             ],
+             "stars": [ {"x": 100}, {"x": 190}, {"x": 840} 
+             ]
+  },
+  "platformData": []
+   }
