@@ -10,6 +10,8 @@ let cursors;
 let SLIME_VELOCITY = 400;
 let SLIME_ACCELERATION = 5;
 const HUD_HEIGHT = 50;
+const MUD_FACTOR = 0.5;
+const ICE_FACTOR = 4;
 let currentSpeed = 0;
 let bullets;
 //---------------para le escenario---------------
@@ -28,6 +30,11 @@ let score = 0;
 let scoreText;
 let levelText;
 let numApples;
+
+let slideTiles;     // Teselas que aumentan la velocidad
+let stickyTiles;    // Teselas que reducen el movimiento del personaje.
+let speedFactor = 1;    // Factor de velocidad que interviene en el movimiento del personaje.
+
 //---------------PRELOAD---------------
 function loadL1() {
     game.load.audio('door', 'assets/snds/door.wav');
@@ -46,6 +53,8 @@ function loadL1() {
     game.load.image('puerta', 'assets/imgs/puerta.png');
     game.load.image('wall', 'assets/imgs/pared-64-256.png')
     game.load.image('wall2', 'assets/imgs/pared-64-256-vertical.png')
+    game.load.image('ice', 'assets/imgs/ice-tile-128.png');
+    game.load.image('mud', 'assets/imgs/mud-tile-128.png');
 
 
 };
@@ -122,6 +131,11 @@ function createL1() {
 
 function createGround() {
     platforms = game.add.group();
+    slideTiles = game.add.group();
+    slideTiles.enableBody = true;
+    stickyTiles = game.add.group();
+    stickyTiles.enableBody = true;
+
     platforms.enableBody = true;
     //bot
     botPlatform = platforms.create(128, game.world.height - 128, 'bot');
@@ -186,8 +200,18 @@ function createGround() {
     wall18.body.immovable = true;
     let wall19=platforms.create(256+64+256,320+128, 'wall2');
     wall19.body.immovable = true;
-    
-    
+
+    // Ice tiles
+    let iceT1 = slideTiles.create(game.world.centerX, 128, 'ice');
+    iceT1.body.immovable = true;
+    let iceT2 = slideTiles.create(game.world.centerX - 128, 128, 'ice');
+    iceT2.body.immovable = true;
+    let iceT3 = slideTiles.create(game.world.centerX - 256, 128, 'ice');
+    iceT3.body.immovable = true;
+    let iceT4 = slideTiles.create(game.world.centerX - 384, 128, 'ice');
+    iceT3.body.immovable = true;
+    let mud1 = stickyTiles.create(game.world.centerX, game.world.centerY - 200, 'mud');
+    mud1.body.immovable = true;
     
 
 };
@@ -235,11 +259,17 @@ function clearStage(item) {
 */
 
 function updateL1() {
-    manageSlimeMovements();
+    speedFactor = 1;
+    game.physics.arcade.overlap( slime, slideTiles, slide, null, this);
+    game.physics.arcade.overlap( slime, stickyTiles, stick, null, this);
+    manageSlimeMovementsL1();
     game.camera.follow(slime);
     //  Checks to see if the player overlaps with any of the apples, if he does call the
     //  collectapple function
     game.physics.arcade.overlap(slime, apples, collectapple, null, this);
+
+    // Overlap con las diferentes tiles
+    /* Tiles de hielo */
     game.physics.arcade.collide(slime, platforms);
     if (puerta) { game.physics.arcade.collide(slime, puerta, doorCollide, null, this); }
     /* if (game.input.activePointer.leftButton.isDown || fireButton.isDown)
@@ -248,6 +278,25 @@ function updateL1() {
      }*/
 
 };
+
+/**
+ * Gestiona que el jugador pise sobre una tile de hielo
+ * @param {Object} slime objeto del jugador
+ * @param {Object} tile tesela en la que se encuentra el jugador.
+ */
+function slide( slime, tile ) {
+    speedFactor = ICE_FACTOR;
+    currentSpeed += 20;
+}
+
+/**
+ * Gestiona que el jugador pise sobre una tile de barro
+ * @param {Object} slime objeto del jugador
+ * @param {Object} tile tesela en la que se encuentra el jugador.
+ */
+function stick( slime, tile ) {
+    speedFactor = MUD_FACTOR;
+}
 
 
 function collectapple(slime, apple) {
@@ -325,7 +374,7 @@ function fire(){
     }
 
 };*/
-function manageSlimeMovements() {
+function manageSlimeMovementsL1() {
 
     //controles horizontales
 
@@ -364,9 +413,13 @@ function manageSlimeMovements() {
         //  The speed we'll travel at
         //    currentSpeed = 300;
         // slime.body.acceleration = SLIME_ACCELERATION;
-        if (currentSpeed < SLIME_VELOCITY) currentSpeed += SLIME_ACCELERATION;
+        if (currentSpeed < SLIME_VELOCITY * speedFactor) currentSpeed += SLIME_ACCELERATION;
+        else { currentSpeed = SLIME_VELOCITY * speedFactor; }
     }
     else {
+        if (currentSpeed > SLIME_VELOCITY * speedFactor){
+            currentSpeed = SLIME_VELOCITY * speedFactor;
+        }
         if (currentSpeed > 0) {
             currentSpeed -= 4;
         }
