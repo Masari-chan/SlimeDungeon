@@ -26,14 +26,12 @@ function loadT2() {
     game.load.image('bgT', 'assets/imgs/bgT.jpg');//fondo
     game.load.image('bullet', 'assets/imgs/purple_ball.png');//proyectil
 
-
-
 }
 
 function createT2() {
     //primero dibujamos el fondo tileado
     game.add.image(0, 0, 'bgT');
-    ball=game.add.audio('ball');
+    ball = game.add.audio('ball');
     createBullets();
     //----ahora creamos el slime, si lo hacemos la reves, no se ve
     createSlime();
@@ -104,6 +102,20 @@ function fire() {
             game.physics.arcade.velocityFromRotation(slime.rotation, BULLET_SPEED, bullet.body.velocity);
             ball.play();
         }
+    }
+
+};
+
+function enemyFire(enemy) {
+
+    if (game.time.now > nextEnemyFire && bullets.countDead() > 0) {
+        nextEnemyFire = game.time.now + enemyFireRate;
+
+        let bullet = bullets.getFirstDead();
+
+        bullet.reset(enemy.x - 8, enemy.y - 8);
+        game.physics.arcade.velocityFromRotation(enemy.rotation, BULLET_SPEED, bullet.body.velocity);
+        ball.play();
     }
 
 };

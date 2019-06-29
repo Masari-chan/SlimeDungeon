@@ -20,7 +20,9 @@ let platforms, botPlatform, topPlatform, izqPlatform, derPlatform, izq_topPlatfo
 
 //--------------------
 let fireRate = 100;
+let enemyFireRate = 500;
 let nextFire = 0;
+let nextEnemyFire = 0;
 let fireButton;
 //para las manzanas coleccionables
 const VICTORY_POINTS = 10;
@@ -55,7 +57,7 @@ function loadL1() {
     game.load.image('wall2', 'assets/imgs/pared-64-256-vertical.png')
     game.load.image('ice', 'assets/imgs/ice-tile-128.png');
     game.load.image('mud', 'assets/imgs/mud-tile-128.png');
-
+    game.load.image('spike','assets/imgs/spike64-64.png');
 
 };
 //---------------CREATE---------------
@@ -123,9 +125,6 @@ function createL1() {
     scoreText.cameraOffset.setTo(650, 500);
     levelText.cameraOffset.setTo(650, 540);
 
-
-
-
 };
 
 
@@ -135,6 +134,8 @@ function createGround() {
     slideTiles.enableBody = true;
     stickyTiles = game.add.group();
     stickyTiles.enableBody = true;
+    spikcyObstacles = game.add.group();
+    spikcyObstacles.enableBody = true;
 
     platforms.enableBody = true;
     //bot
@@ -161,7 +162,7 @@ function createGround() {
     //derBot
     derBotPlatform = platforms.create(1664, 1152, 'derBot');
     derBotPlatform.body.immovable = true;
-    //WALLS
+    //WALLS-non damaging obstacle
     let wall1=platforms.create(128, 256, 'wall');
     wall1.body.immovable = true;
     let wall2=platforms.create(128, 512, 'wall');
@@ -209,11 +210,44 @@ function createGround() {
     let iceT3 = slideTiles.create(game.world.centerX - 256, 128, 'ice');
     iceT3.body.immovable = true;
     let iceT4 = slideTiles.create(game.world.centerX - 384, 128, 'ice');
-    iceT3.body.immovable = true;
-    let mud1 = stickyTiles.create(game.world.centerX, game.world.centerY - 200, 'mud');
+    iceT4.body.immovable = true;
+    let iceT5 = slideTiles.create(game.world.centerX - 384, 384-64, 'ice');
+    iceT5.body.immovable = true;
+    let iceT6 = slideTiles.create(game.world.centerX - 384-128, 384-64, 'ice');
+    iceT6.body.immovable = true;
+    let iceT7 = slideTiles.create(game.world.centerX+384, 384-64, 'ice');
+    iceT7.body.immovable = true;
+    let iceT8 = slideTiles.create(game.world.centerX+384-128, 384-64, 'ice');
+    iceT8.body.immovable = true;
+    let iceT9 = slideTiles.create(game.world.centerX+384, 384-64+128, 'ice');
+    iceT9.body.immovable = true;
+    let iceT10 = slideTiles.create(game.world.centerX+384, 384-64+128+128, 'ice');
+    iceT10.body.immovable = true;
+    //mud tiles
+    let mud1 = stickyTiles.create(game.world.centerX, game.world.centerY - 64, 'mud');
     mud1.body.immovable = true;
-    
+    let mud2 = stickyTiles.create(game.world.centerX+128, game.world.centerY - 64, 'mud');
+    mud2.body.immovable = true;
+    let mud3 = stickyTiles.create(game.world.centerX+256, game.world.centerY - 64, 'mud');
+    mud3.body.immovable = true;
 
+    //spike-damaging obstacles
+    let spike1 = spikcyObstacles.create(game.world.centerX+256+64, game.world.centerY - 64, 'spike');
+    spike1.body.immovable = true;
+    let spike2 = spikcyObstacles.create(game.world.centerX+256+64, game.world.centerY - 64+64, 'spike');
+    spike2.body.immovable = true;
+    let spike3 = spikcyObstacles.create(game.world.centerX+256+64+384, game.world.centerY - 64+64, 'spike');
+    spike3.body.immovable = true;
+    let spike4 = spikcyObstacles.create(game.world.centerX+256+64+384, game.world.centerY - 64, 'spike');
+    spike4.body.immovable = true;
+    let spike5 = spikcyObstacles.create(game.world.centerX+256+384, game.world.centerY - 64, 'spike');
+    spike5.body.immovable = true;
+    let spike6 = spikcyObstacles.create(game.world.centerX+256+384, game.world.centerY - 64+64, 'spike');
+    spike6.body.immovable = true;
+    let spike7 = spikcyObstacles.create(game.world.centerX+256+64, game.world.centerY - 64, 'spike');
+    spike7.body.immovable = true;
+    let spike8 = spikcyObstacles.create(game.world.centerX+256+64, game.world.centerY - 64+64, 'spike');
+    spike8.body.immovable = true;
 };
 /*function createBullets(){
     bullets = game.add.group();
@@ -232,11 +266,7 @@ function createSlime() {
     slime.anchor.setTo(0.5, 0.5);
     slime.enableBody = true;//<--------------------------------------------------------------probando
 
-
-
-
-}
-;
+};
 function createKeyControls() {
     cursors = game.input.keyboard.createCursorKeys();
     game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -271,6 +301,7 @@ function updateL1() {
     // Overlap con las diferentes tiles
     /* Tiles de hielo */
     game.physics.arcade.collide(slime, platforms);
+    game.physics.arcade.collide(slime,spikcyObstacles);
     if (puerta) { game.physics.arcade.collide(slime, puerta, doorCollide, null, this); }
     /* if (game.input.activePointer.leftButton.isDown || fireButton.isDown)
      {
